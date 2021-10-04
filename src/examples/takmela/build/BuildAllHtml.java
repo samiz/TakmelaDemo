@@ -9,6 +9,7 @@ import examples.takmela.datalog.viz.RsgAbridgedVizHtml;
 import examples.takmela.datalog.viz.RsgVizHtml;
 import examples.takmela.datalog.viz.SelfMatchVizHtml;
 import examples.takmela.datalog.viz.SiblingsVizHtml;
+import examples.takmela.parser.viz.Arith_Ambig_Complicated_VizHtml;
 import examples.takmela.parser.viz.Arith_MoreComplicated_VizHtml;
 import examples.takmela.parser.viz.Arith_OnePlusTwoPlusThree_Ambig_VizHtml;
 import examples.takmela.parser.viz.Arith_OnePlusTwoPlusThree_VizHtml;
@@ -30,6 +31,7 @@ public class BuildAllHtml
 		// Takmela parser examples
 		Arith_OnePlusTwo_VizHtml.build();
 		Arith_MoreComplicated_VizHtml.build();
+		Arith_Ambig_Complicated_VizHtml.build();
 		Arith_OnePlusTwoPlusThree_VizHtml.build();
 		Arith_OnePlusTwoPlusThree_Ambig_VizHtml.build();
 		LeftRecursion_Indirect_VizHtml.build();
