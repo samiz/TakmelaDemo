@@ -12,7 +12,7 @@ Where are the main algorithms?
 
 The parser is in the Java class [takmela.engine.ParseEngine](src/takmela/engine/ParseEngine.java)
 
-The Datalog query executor is in [takmelogic.engine.TakmelaDatalogEngine](src/takmelogic.engine.TakmelaDatalogEngine.java)
+The Datalog query executor is in [takmelogic.engine.TakmelaDatalogEngine](src/takmelogic/engine/TakmelaDatalogEngine.java)
 
 Each is about 500 lines of code.
 
@@ -27,7 +27,7 @@ Parsing with Takmela
 
 Takmela's grammar format is described in the document [Writing Takmela grammars](doc/WritingTakmelaGrammars.md), and to learn how to use the parse trees given by Takmela, check out [Using Takmela parse trees](doc/UsingTakmelasParseTrees.md)
 
-The [takmela.tool.Parse](src/takmela.tool.Parse) class contains lots of helper functions to help you easily load grammars and parse text with them, it is recommended to check it out.
+The [takmela.tool.Parse](src/takmela/tool/Parse.java) class contains lots of helper functions to help you easily load grammars and parse text with them, it is recommended to check it out.
 
 Here's the simplest program to parse some input with Takmela:
 
@@ -52,7 +52,7 @@ If you're looking for an example which parses more than toy grammars, this proje
 Running Datalog queries with Takmelogic
 =========
 
-The Datalog program syntax is described in the document [Writing Datalog Programs](./WritingDatalogPrograms.md)
+The Datalog program syntax is described in the document [Writing Datalog Programs](./doc/WritingDatalogPrograms.md)
 
 The [takmelogic.tool.RunDatalog](src/takmelogic/tool/RunDatalog.java) class contains helper functions to load Datalog programs and run queries on them.
 

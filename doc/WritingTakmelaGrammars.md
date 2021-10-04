@@ -17,7 +17,7 @@ WS skip: (' ' | [\n\r\t])+;
 
 A more detailed example grammar
 ====
-Please check out [dot.takmela](./dot.takmela) at the project's root directory, which is used as part of the project itself.
+Please check out [dot.takmela](../dot.takmela) at the project's root directory, which is used as part of the project itself.
 
 Basic Layout & Syntax rules
 ====

@@ -67,4 +67,4 @@ Each of the `enum...` function takes a tree and a callback, and invokes the call
 
 Real-world example
 ===
-For an example of real-world parse tree processing, check out [ReadDot](src/takmela/viz/graphicsElements/ReadDot.java) in the same project.
+For an example of real-world parse tree processing, check out [ReadDot](../src/takmela/viz/graphicsElements/ReadDot.java) in the same project.

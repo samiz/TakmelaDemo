@@ -24,9 +24,9 @@ public class BuildMainArticle
 		
 		String templ = Utils.readAllFile("./trace_templates/takmela_article.html");
 		String html = templ.replace("{{trace_one_plus_two}}", onePlusTwoTrace);
-		Utils.writeToFile("./trace_html/takmela_article.html", html);
+		Utils.writeToFile("./trace_html/index.html", html);
 		
-		System.out.println("Generated main article in ./trace_html/takmela_article.html");		
+		System.out.println("Generated main article in ./trace_html/index.html");		
 	}
 
 	private static String renderOnePlusTwo() throws IOException, UniquenessException, LexerError, GrammarParsingException
