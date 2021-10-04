@@ -1,0 +1,41 @@
+/*
+    An example of Datalog evaluation from the book
+    "Foundations of Databases" by Abiteboul, Hull & Viano
+    presented in chapter 13
+    
+    The program is called "reverse_same_generation", apparently because it's not 
+    enough for two elements to be on the same level to be included in the result,
+    but there needs to be an "up then down" or a "down then up" path from one of them to the other.
+*/
+
+// 'up' means 'goes up to'
+u("a", "e").
+u("a", "f").
+u("f", "m").
+u("g", "n").
+u("h", "n").
+u("i", "o").
+u("j", "o").
+
+// 'goes horizontally toward'
+f("g", "f").
+f("m", "n").
+f("m", "o").
+f("p", "m").
+
+// 'goes down to'
+d("l", "f").
+d("m", "f").
+d("g", "b").
+d("h", "c").
+d("i", "d").
+d("p", "k").
+
+r(X, Y):-
+    f(X, Y).
+
+r(X, Y):-
+    u(X, X1),
+    r(Y1, X1),
+    d(Y1, Y)
+    .

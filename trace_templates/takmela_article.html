@@ -1,0 +1,463 @@
+<!DOCTYPE html">
+<html><head><meta charset="utf-8"><title>Takmela: an algorithm for parsing and Datalog query execution</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="dom.css">
+<script src="dom.js"></script>
+</head>
+<body>
+
+<div class="topNav">
+<a href="./takmela_article.html">Main Article</a><a href="./examples_toc.html">Examples TOC</a>
+</div>
+<div style="clear:both;"></div>
+
+<h1>Takmela: an algorithm for parsing and Datalog query execution</h1>
+<h3 style="text-align:center;">by Mohamed Samy (samy2004@gmail.com)</h3>
+A lot of modern (and old) parsing algorithms utilize a data structure called the Graph-structured Stack (GSS). You can find it in GLL, implicitly in Earley’s parser, and many more. I believe this data structure to be a very interesting piece of math/CS, and that it might have a larger role to play. Today I’ll show you two algorithms, the first is for general parsing – that is, parsing any CFG – and the second is for executing Datalog queries. We’ll realize that the second algorithm is exactly the same as the first, parameterized by a different set of data types and actions that apply to the GSS. If those two algorithms work as advertised, then we can probably generalize this same algorithm to many other operations; all expressed as the same basic routine.
+
+<p>This article is long and requires some knowledge of parsing (not too advanced knowledge, I promise) but if you like computer science I feel you would really, really enjoy reading it; so let’s go!</p>
+
+<h2>The Takmela parser</h2>
+
+<p>The parser version of the Takmela depends on combining the CS concepts of a graph-structured stack and the continuation.</p>
+
+<p>We can begin to understand how Takmela works by looking at a common problem in parsing from context-free grammars; namely the left-recursion problem. Consider the classic arithmetic expression example:</p>
+
+<pre>
+expr → expr ‘+’ term
+     | term
+
+term → NUM
+</pre>
+
+<p>Let’s try to parse it with the input <span class="snippet">1+2+3</span></p>
+
+<p>A naive top-down parser will try to ‘invoke’ <span class="snippet">expr</span> , attempt to parse the first alternative, and so immediately try to recursively invoke <span class="snippet">expr</span> again without consuming any input. This will lead to an infinite loop.</p>
+
+<p>A less naive parsing algorithm can do the following: if it encounters left recursion in <span class="snippet">expr</span> it will freeze parsing at that point and try other alternatives first. If one of the others succeed the parser will go back in time into the first (recursive) alternative, and substitute any ‘successes’ of <span class="snippet">expr</span> obtained so far into the left recursive call. Awesome right?</p>
+
+<p>Let’s try to work through a hypothetical time-jumping parser, and parse <span class="snippet">1+2</span> using our left recursive grammar.</p>
+
+<p>We’ll use a notation like <span class="snippet">expr/0</span> to indicate a ‘call’ to <span class="snippet">expr</span>, i.e a parsing attempt, starting at input position <span class="snippet">0</span>.</p>
+
+<p>We’ll use a notation like <span class="snippet">expr → expr • ‘+’ term</span> to indicate a <b>CodePos</b>, for example the preceding CodePos says "we are in the middle of running the first alternative of <span class="snippet">expr</span>, we have successfully parsed the recursive call, and the ‘code’ is now right before trying to match the plus sign"</p>
+
+<p>Let’s run our parser!</p>
+
+
+<span class="section">Rules</span>
+<pre>
+expr → expr ‘+’ term
+            | term
+
+term → NUM
+</pre>
+
+<span class="section">Input</span>
+<pre>
+1 + 2
+</pre>
+
+<span class="section">Trace</span>
+<ul>
+    <li>Call <span class="snippet">expr/0</span></li>
+    <ul>
+        <li><span class="def">XX</span> Suspend the first alternative (since it’s left recursive)</li>
+        <li>Call the second alternative
+            <ul>
+                <li><span class="snippet">Call term/0</span>
+                    <ul>
+                        <li>Match <span class="snippet">‘1’</span>, input pos now = <span class="snippet">1</span></li>
+                        <li><span class="snippet">term/0</span> succeeded, return to <span class="snippet">expr/0</span>; second alt.</li>
+                    </ul>
+                </li>
+                <li><span class="snippet">expr/0</span> succeeded! Our input pos is now = <span class="snippet">1</span>; use this success to go back in time and resume the frozen parse (indicated by XX)</li>
+            </ul>     
+        </li>
+    </ul>
+</ul>
+
+
+<ul>
+<li>Resume <span class="snippet">expr/0</span> at CodePos <span class="snippet">expr → expr  • ‘+’ term</span> input pos now <span class="snippet">1</span>
+    <ul>
+        <li>Match <span class="snippet">‘+’</span> input pos now <span class="snippet">2</span></li>
+        <li>Call <span class="snippet">term/2</span>
+            <ul>
+                <li>Match <span class="snippet">‘2’</span>, input pos now <span class="snippet">3</span></li>
+                <li><span class="snippet">term/2</span> has succeeded, return to <span class="snippet">expr/0</span></li>
+            </ul>
+        </li>
+        <li>We are now at <span class="snippet">expr/0</span> CodePos <span class="snippet">expr → expr  ‘+’ term •</span> inputPos <span class="snippet">3</span></li>
+        <li>We are at the end of <span class="snippet">expr/0</span>, i.e it has succeeded, also we are at the end of the parser's input so yay! successful parse!</li>
+    </ul>
+</li>
+</ul>
+
+<p>If we try to use the same algorithm to parse <span class="snippet">1+2+3</span> a rather interesting thing will happen: we will resume the frozen <span class="snippet">expr/0</span> twice! Once will be like the above when <span class="snippet">1</span> was fully parsed as an expr, and the second time when <span class="snippet">1+2</span> is fully parsed (i.e when the full trace above is completed). When <span class="snippet">1+2</span> is parsed it will resume <span class="snippet">expr/0</span> at <span class="snippet">expr → expr  • ‘+’ term</span> all ready to match <span class="snippet">+</span> and <span class="snippet">3</span>.</p>
+
+<p>We are using a technique of (1) freezing or setting aside the remaining execution of some parse (2) Invoking it with results from other parts of the program.</p>
+
+<p>This concept of ‘frozen program that we can re-execute’ is called a continuation, and is the core of what we’re trying to do with Takmela.</p>
+
+<p>Notice however that implementing our hypothetical time-jump parser feels rather complex, doesn’t it? We’ll need to implement something resembling a call stack for non-left-recursive parsing and yet deal with representing continuations, resuming them, and so on.</p>
+
+<p>To simplify things we’ll go further, everything will use continuations; there will be no ‘normal calls’, and our parser doesn’t even need to analyze the grammar to detect what calls are left-recursive.</p>
+
+<p>Turns out this "suspend all the things" approach makes the parser rather powerful; all the nasty things like left-recursion, ambiguity, wrong behavior due to nullable nonterminals; all these things become normal processing steps when we don’t use direct calls. The algorithm will just keep eating away at the input, branching as many times as it needs.</p>
+
+<p>We are now in a position to understand the full algorithm. Let’s define the little pieces from which we’ll form our parsing engine…</p>
+<h3>How Takmela parsing works</h3>
+<p>A <b>Call</b> is a pair <span class="def">(non_terminal, input_pos)</span> ; for example a call <span class="snippet">(term, 5)</span> or <span class="snippet">term/5</span> means we’re trying to parse a <span class="snippet">term</span>, starting from input position <span class="snippet">5</span>.</p>
+
+<p>A <b>CodePos</b> is a place in a rule body, indicating what has been parsed so far; we’ll represent it here by a heavy dot. For example in the first alternative of expr, we could have a CodePos like this: <span class="snippet">expr → expr ‘+’ • term</span> which means we have parsed an expr and a plus sign, but are yet to parse the final term</p>
+
+<p>A <b>Continuation</b> is a tuple <span class="def">(Call, CodePos)</span></p><p> The role of a continuation is to tell us what should happen after a callee has succeeded. <i>Example</i> Suppose a rule <span class="snippet">a → b c d</span> was called at position <span class="snippet">5</span> , calling <span class="snippet">b</span> moved us to position <span class="snippet">7</span> , and the sub-call to <span class="snippet">c</span> at position <span class="snippet">7</span> has succeeded; what should happen after <span class="snippet">c</span>’s success? We should resume the call to <span class="snippet">a / 5</span> right before <span class="snippet">d</span> , thus one of the continuations for the callee <span class="snippet">c / 7</span> is <span class="snippet">(a/5, a → b c • d)</span></p>
+
+<p>Notice that the call <span class="snippet">a/5</span> means "attempting to parse an ‘a’ starting at position 5"; resuming that call will continue from wherever <span class="snippet">c</span> has finished parsing, not from position 5.</p>
+
+<p>Our program state is stored into these variables:</p>
+
+<p><b>K</b> is the continuation table, it maps from <span class="snippet">Call → Set
+&lt;continuation&gt;</span> , as in the example above. This is our graph-structured stack. (if you’re into writing interpreters, this graph looks like a family of related call stacks in a compact data structure)</p>
+
+<p><b>S</b> is the success table or memoisation table; it stores all calls that have succeeded so far. It maps from <span class="snippet">Call → Set&lt;final_input_pos&gt;</span>. For example an item <span class="snippet">(expr, 5) → 10</span> means that a parse for <span class="snippet">expr</span> starting from position <span class="snippet">5</span> has succeed, and the rest of the parsing (resumed via a continuation) should continue at position <span class="snippet">10</span>.</p>
+
+<p>If we want to store parse trees, we can have an additional entry in the success table alongside the final position. More about parse trees in our example with ambuiguity</p>
+
+<p>In addition to K and S, we will have <b>newK</b> and <b>newS</b> where we collect any newly created continuations or successes at a given iteration of the algorithm. They have the same structure as the original K & S.</p>
+
+<p>A final part of the program state is the <b>Awakenings</b> set, used to prevent redundant re-parsing of past successful parses.  Awakenings is a set of <span style="def">(input_pos, continuation)</span> pairs, so having an awakening like <span class="snippet">(5, (a/2, a → b c • d))</span> means "we have already processed the call to <span class="snippet">c</span> from its parent <span class="snippet">(a, 2)</span>, and this call to <span class="snippet">c</span> has succeeded at position <span class="snippet">5</span>".</p>
+
+<p>In an imagined ML-like language, our program state would be fully expressed like this:</p>
+<pre>
+  type Call = (RuleName, InputPos)
+  type Continuation = (Call, CodePos)
+
+  K :: Map&lt;Call, Set&lt;Continuation&gt;&gt;
+  S :: Map&lt;Call, Set&lt;InputPos&gt;&gt;
+  newK :: sametype K
+  newS :: sametype S
+  Awakenings :: Set&lt;(InputPos, Continuation)&gt;
+</pre>
+
+<p>The parser works in iterations, it starts with exactly one call (calling the root non-terminal at input position zero) and each iteration processes pending calls, matching tokens as much as it can until it finds a nonterminal (if so it calls/processes it) or reaches the end of the rule (if so, the rule succeeds). This processing might generate new continuations and successes. </p>
+
+<p>(reminder: continuations are entries to K/newK which are created from calling non-terminals, and successes are entries in S/newS created from <span class="snippet">process(..)</span> working through a rule till the end).</p>
+
+<p>After processing, new continuations and successes are joined ; so a new success might lead to resuming some existing continuation (going ‘back in time’). Similarly a new call/continuation might join with an existing success, meaning "there are existing results of calling the same rule at the same position (outside of this continuation), let’s resume the new call’s continuations with them".</p>
+
+<p>Any new items (continuations and successes) from the joining will be processed in the next iteration.</p>
+
+<p>(If you’re familiar with Datalog implementation all of this should sound familiar; Takmela is basically a special case of semi-naive).</p>
+In pesudocode:
+<pre>
+K = {}; newK = {}  // init continuations
+S = {}; newS = {}  // init successes
+
+callRootRule() // invokes 'process' on the rule’s branches, to match tokens etc
+               // might generate some newK and newS records
+
+while(true)
+{
+    kWorklist = diff(newK, K)    // we need only the continuations not seen before
+    sWorklist = diff(newS, S)    // ditto
+    
+    if(kWorklist.size == 0 && sWorklist.size == 0)
+    { 
+       break // stop if we reach a fixed point
+    }     
+
+    newK = {}
+    newS = {}
+    K = merge(kWorklist, K)
+    S = merge(sWorklist, S)
+    
+    joinNewContinuationsWithPastSuccesses(kWorklist, S) // may invoke `process` on some nonterminals
+                                                        // and may generate (schedule) new conts.
+                                                        // and successes
+                                                        
+    joinNewSuccessesWithPastContinuations(sWorklist, K) // same as above
+}
+</pre>
+
+<p>This is the essential outline of the algorithm, we’ll now explain it again in pseudocode but in detail, and show the role of the <span class="snippet">awakenings</span> set too.</p>
+
+<details open>
+<summary><i>Takmela's parsing algorithm in detail</i></summary>
+<pre>
+K = {}; newK = {}  // init continuations
+S = {}; newS = {}  // init successes
+
+awakenings = {}
+
+call(startRule, 0)
+
+while(true)
+{
+    kWorklist = diff(newK, K)
+    sWorklist = diff(newS, S)
+    
+    if(kWorklist.size == 0 && sWorklist.size == 0)
+    { 
+        break  // stop if we reach a fixed point
+    }     
+
+    newK = {}
+    newS = {}
+    
+    K = merge(kWorklist, K)
+    S = merge(sWorklist, S)
+
+    awakenings.clear()
+    
+    joinNewContinuationsWithPastSuccesses(kWorklist, S) // may invoke 'process' on some nonterminals
+                                                        // and may generate (schedule) new conts. and
+                                                        // successes
+                                                        
+    joinNewSuccessesWithPastContinuations(sWorklist, K) // same as above
+}
+
+func call(string callee, string caller, int inputPosNow, CodePos codePos)
+{
+    Cont cont = ((caller, inputPosNow), codePos)
+    bool firstCall = ! ( K.containsKey((callee, inputPosNow)) || newK.containsKey((callee, inputPosNow)) )
+    
+    newK[callee, inputPosNow].add(cont) // schedule a 'join new continuation with successes'
+
+    if (firstCall)
+    {
+        process(callee, inputPosNow)
+    }
+}
+
+func process(string ruleName, int inputPos)
+{
+    Rule r = rules[ruleName]
+
+    for (RuleBranch b : r.branches)
+    {
+        processBranch(ruleName, b.codeStart(), inputPos)
+    }
+}
+
+func processBranch(string ruleName, CodePos codePos, int inputPosNow)
+{
+    if (ruleName == "root" && eof(inputPosNow))
+    {
+        fire event onSuccessfulParse()   // ← this is where the algorithm actually yields results
+                                         // if we return parse trees, we’d pass them here
+        return
+    }
+    
+    bool stop = false
+    int inputPos = inputPosNow
+    
+    while (codePos != endOfRuleBranch)
+    {
+        if (codePos is Terminal)
+        {
+            Terminal t = codePos
+            if (!match(t, inputPos))
+            {
+                stop = true
+                break
+            }
+            else
+            {
+                inputPos++
+            }
+        }
+        else if (codePos is Nonterminal)
+        {
+            Nonterminal toCall = codePos
+            call(toCall.name, ruleName, inputPos, next(codePos));
+            stop = true
+            break
+        }
+        
+        codePos = next(codePos)
+        
+    } // end while
+    
+    if (!stop)
+    {
+        // Reached the end of this rule branch without stopping due to match failure or
+        // nonterminal call
+        // This means the rule has succeeded, let's schedule a 'join new success with continuations'
+
+        newS[ruleName, inputPosNow].add(inputPos)
+    }
+}
+
+func joinNewContinuationsWithPastSuccesses(kWorklist, S)
+{
+    for(k of kWorklist.entries())
+    {
+        (callee, posAtCallee) = k.key
+        Set<Cont> cs = k.value
+        for(Cont c : cs)
+        {
+            successes = S[callee, posAtCallee]
+            for(int s : successes)
+            {
+                if(!awakenings.containsKey((s, c)))
+                {
+                    awakenings.add((s,c))
+                    processBranch(c.caller, c.codePos, s)
+                }
+            }
+        }
+    }
+}
+
+func joinNewSuccessesWithPastContinuations(sWorklist, K)
+{
+    for (s : sWorklist)
+    {
+        (callee, posAtCallee) = s.key
+        successPositions = s.value
+        for (int p : successPositions)
+        {
+            contSet = K[callee, posAtCallee]
+            
+            for (cont : contSet)
+            {
+                if (!awakenings.contains((p, cont)))
+                {
+                    awakenings.add((p, cont));
+                    processBranch(cont.caller, cont.codePos, p)
+                }
+            }
+        }
+    }
+}
+</pre>
+</details>
+
+<p>We will now do a trace of parsing <span class="snippet">1+2</span> using Takmela, then again with <span class="snippet">1+2+3<span></p>
+
+<details open>
+<summary>Let's trace how Takmela parses 1+2</summary>
+<p class="traceHintMessage">Hint: if the trace appears confusing <a href="./trace_legend.html">this</a> might help</p>
+<p class="traceHintMessage">You can collapse this trace and open it in a separate page, link <a href="./parser_examples/arith_one_plus_two/index.html">here</a></p>
+{{trace_one_plus_two}}
+</details>
+
+<p>The next step is to trace <span class="snippet">1+2+3</span> which you'll find <a href="./parser_examples/arith_one_plus_two_plus_three/index.html">here</a>.</p>
+
+<p>For many more examples, you can go <a href="./examples_toc.html">here</a>.</p>
+
+<p>If you want actual code you’ll find the Java implementation <a href="https://github.com/samiz/TakmelaDemo">here</a>. If you want examples more complex than 1+2 you’ll find that I’ve included some tricky cases in the <a href="./examples_toc.html">Examples TOC</a>, including ambiguity and nullable rules. If you want to see some real-world usage of Takmela, the demo program itself uses Takmela to parse a subset of GraphViz dot files: This is the <a href="https://github.com/samiz/TakmelaDemo/blob/master/dot.takmela">grammar</a> and this is the <a href="https://github.com/samiz/TakmelaDemo/blob/master/src/takmela/viz/graphicsElements/ReadDot.java">code</a> for parsing it</p>
+
+<p>The parsing algorithm is implemented in about <a href="https://github.com/samiz/TakmelaDemo/blob/master/src/takmela/engine/ParseEngine.java">500 lines</a> of Java code, and using more expressive languages would likely reduce that size even further; not bad for a general parser. Remember that Takmela should work with any context-free grammar, including ones with left recursion (both direct and indirect), ambiguity, nullable non-terminals, and even left-recursion-like behavior that results from nullable non-terminals (e.g <span class="snippet">a → b a c</span> when <span class="snippet">b</span> is nullable). And it does that without any analysis or transformation of its grammar; it just runs.</p>
+
+<p>But let’s talk about Datalog…</p>
+
+<h2>Takmelogic: A Datalog execution engine based on Takmela</h2>
+
+First, a very quick introduction to Datalog: Datalog is a language of facts and deductions from rules; consider the classic example below, consisting of four facts followed by two rules:
+<pre>
+// Notice that constants always start with small letters while
+// variables will always start with capital letters
+parent(a, b).
+parent(b, c).
+parent(a, d).
+parent(d, e).
+
+// If there’s a Z such that X is a parent of Z, and Z is a 
+// parent of Y, we can infer the relation "X is a grandparent of Y"
+grandparent(X, Y):- parent(X, Z), parent(Z, Y).
+
+// All parents are ancestors
+ancestor(X, Y):- parent(X, Y).
+
+// An ancestor of an ancestor is also an ancestor
+// Notice that Z is used in exactly the same way as in ‘grandparent’
+ancestor(X, Y):- ancestor(X, Z), ancestor(Z, Y).
+</pre>
+Datalog is an amazing language, you supply it with some straightforward rules and a database (even one as simple as the four facts above) and it will make you feel as if the computer is thinking. Here are some sample runs of Datalog queries, which run against the above program:
+<pre>
+?- parent(a, X)
+X = [b, d]
+
+?- grandparent(X, e)
+X = [a]
+
+?- ancestor(a, X)
+X = [b, c, d, e]
+
+?- ancestor(X, c)
+X = [b, a]
+</pre>
+
+<p>There are many ways to implement Datalog; which can be roughly classified as top-down and bottom-up.</p>
+
+<p>A top-down algorithm will start with a query like <span class="snippet">ancestor(X, c)</span> and try to run any subgoals required to solve the parent query; e.g <span class="snippet">ancestor(X, c)</span> yields calls to <span class="snippet">parent(X, c)</span> from rule 1, and to <span class="snippet">ancestor(X, Z)</span> & <span class="snippet">ancestor(Z, c)</span> from rule 2.</p>
+
+<p>A bottom-up algorithm, like the famous semi-naive, will start from the facts and keep applying the rules in an attempt to infer all possible data; as if your queries were all variables. It will be as if you must always run <span class="snippet">grandparent(V0, V1)</span> or <span class="snippet">ancestor(V0, V1)</span>.</p>
+
+<p>Top-down Datalog engines obviously do less work when the query has some solution-constraining data, like <span class="snippet">ancestor(X, c)</span> <i>[note: not talking about constraint-solving]</i>. There are clever algorithms, like the so called Magic Sets, that fool bottom-up algorithms into working like top-down algorithms. They do this by generating a few new rules and a new query, such that running seminaive on the modified program will simulate a top-down query engine, constraining data and all, running the original program. It’s really a sign of humanity’s ingenuity.</p>
+
+<p>Let’s think about how a Datalog query might be executed. It feels as if any query engine (let’s focus on top-down) has to do the following:</p>
+<ul>
+<li>Match variables to facts in the database; e.g <span class="snippet">parent(a, X)</span> will return an empty set or some values for <span class="snippet">X</span></li>
+<li>Invoke sub-queries mentioned in a rule, in order to attempt to ‘prove’ the parent rule by proving its body.</li>
+<li>Since we can have multiple rules with the same head (as in <span class="snippet">ancestor</span> above) we might need to run multiple alternatives, and collect results from all of them; though of course some of the alternatives might fail.</li>
+<li>Datalog contains recursion, including possible left recursion, and we must be careful when implementing our interpreter.</li>
+</ul>
+
+<p>This sounds a lot like parsing, and especially like general parsers a la Takmela. To take the idea further I literally did a copy/paste on Takmela’s parser, changed various things, and tested it with some Datalog programs. It worked.</p>
+
+<table>
+<thead><td></td><td>Parsing</td><td>Datalog</td></thead>
+<tbody>
+<tr><td>Input position</td><td>An integer</td><td>n/a</td></tr>
+<tr><td>Call</td><td>Rule Name + input pos</td><td>Rule Name + any constant arguments,<br> e.g <span class="snippet">ancestor(a, ?)</span></td></tr>
+<tr><td>CodePos</td><td>Where are we in a non-terminal rule?</td><td>Where are we in a Datalog rule (aka a Horn Clause)?</td></tr>
+<tr><td>Continuation</td><td>Call + CodePos + "parse tree so far" if we want parse trees.</td><td>Call + CodePos + any bound intermediate variables<br> e.g <span class="snippet">{Z = b}</span></td></tr>
+<tr><td>Success</td><td>Call → Set&lt;FinalInputPos&gt;</td><td>Call → Set&lt;ResultTuple&gt;</td></tr>
+<tr><td>Surface matching</td><td>Matching terminals</td><td>Querying facts</td></tr>
+<tr><td>More complex matching</td><td>Calling non-terminals</td><td>Calling Subgoals</td></tr>
+<tr><td>When resuming a continuation</td><td>Continue from last input position</td><td>Make sure variables match</td></tr>
+</tbody>
+</table>
+
+<p>Datalog as implemented in Takmela doesn’t have the concept of an input position because facts can be matched multiple times while executing a query, perhaps in some variant of the language (linear logic?) a concept of "facts used so far" would correspond to the input position.</p>
+
+<p>A continuation in Datalog-via-Takmela also includes the values of variables that have been already bound; reminding us of the relationship between a continuation and a programming language’s call stack.</p>
+
+<p>Let's see a trace of <span class="snippet">ancestor(b, X)</span> , which can be found <a href="./datalog_examples/ancestors_shortquery/index.html">here</a>. You'll find it closely resembles our traces of Takmela's parsing, with the GSS, successes, and so on. The source code for the core Takmelogic engine can be found <a href="https://github.com/samiz/TakmelaDemo/blob/master/src/takmelogic/engine/TakmelaDatalogEngine.java">here</a>, I suggest opening it with Takmela's <a href="https://github.com/samiz/TakmelaDemo/blob/master/src/takmela/engine/ParseEngine.java">parser code</a> side by side and comparing them!</p>
+
+<p>A Java implementation of the first iteration (lol) of Takmelogic can be found within the same <a href="https://github.com/samiz/TakmelaDemo/">project</a> as the Takmela parser in the <a href="https://github.com/samiz/TakmelaDemo/tree/master/src/takmelogic">takmelogic</a> package.</p> More traces can be found in the <a href="./examples_toc.html">Trace TOC page</a></p>
+
+<h3>Adding to Takmelogic</h3>
+
+<p>Sometimes while executing a Datalog query one needs to wait until  a certain subquery has been completely executed. Consider for example a special operation <span class="snippet">count</span> that works like this:</p>
+
+<pre>
+num_ancestors(X, N):-
+	N:= count ancestor(Y, X).
+</pre>
+
+<p>The predicate <span class="snippet">num_ancestors</span> will attempt to find all tuples where <span class="snippet">Y</span> is an ancestor of <span class="snippet">X</span> and return the number thereof. It is important to schedule the execution such that a call to <span class="snippet">num_ancestors(d, N)</span> will wait until all possible results of <span class="snippet">ancestor(Y, d)</span> have already been computed. This is also important for negation; if we want to test that a certain predicate is <i>not</i> true, we need to make sure no future inference of this predicate will invalidate our conclusion</p>
+
+<p>A plain Takmelogic implementation doesn’t have that guarantee but we can add it. There's a technique that's compatible with the GSS approach we're using, but perhaps that's a topic for another article.</p>
+
+<h3>Comparison with earlier work</h3>
+
+<p><a href="https://en.wikipedia.org/wiki/Earley_parser">Earley’s algorithm</a> is the ancestor of many general parsers. It uses a GSS <a href="https://web.engr.oregonstate.edu/~huanlian/papers/dp-final.pdf">implicitly</a>. <p>Earley's parsing technique has been applied to Prolog/Datalog queries, presented in the paper <a href="https://dl.acm.org/doi/10.3115/981311.981338">parsing as deduction</a> in 1983 and improved upon by <a href="https://web.cecs.pdx.edu/harry/earley/">many</a> other <a href="https://www.researchgate.net/publication/262568707_A_Variant_of_Earley_Deduction_With_Partial_Evaluation">researchers</a>, so I'm definitely not the first person to consider a link between general parsing and Datalog!</p>
+
+<p>Takmela is closely related to a parsing technique presented in Mark Johnson's "Squibs and Discussions: Memoization in Top-Down Parsing" (<a href="https://www.aclweb.org/anthology/J95-3005.pdf">link</a>), with the main difference that Mark Johnson’s technique uses Scheme’s built in continuations language feature, while Takmela represents continuations as an explicit data structure; this opens the door for implementation of the parser in typical programming languages that don’t support continuations, and access to the GSS means the ability to add features like visualizing a running parser, or optimizations that e.g compress or prune the graph-structured stack (If I understood correctly -- and I may have not -- <a href="https://arxiv.org/abs/1910.08129">Marpa</a> seems to make great use of such optimizations).</p>
+
+<p>Takmela was directly inspired by <a href="https://pure.royalholloway.ac.uk/portal/en/publications/gll-parsing(94ca4516-d72c-41ff-b11f-24b14ba15f2d).html">GLL</a> and started as an attempt to simplify it in order to understand it (because I needed a parser for my other projects and wasn’t satisfied with existing tools). In terms of generality and worst-case time complexity Takmela can’t beat GLL; which represents the state of the art in parsing right now. If Takmela were to add something it would be simplicity of understanding and implementation, which could make it easier for more people to make use of general parsing or or add improvements.</p>
+
+<h2>A really important part is missing</h2>
+
+<p>The bad news: I haven’t written a correctness proof for Takmela nor worked out the algorithm’s time complexity. I’ve tried, but it seems I lack the academic experience needed to do so. I do have some rough ideas on how to start but that's it.</p>
+
+<p>Before you dismiss me outright, please consider that it’s okay to ask for help, right? I want to release this work to the world, but I fully acknowledge my lack of the knowledge needed to finish it. I’m not writing this article to celebrate some accomplishment but for the sake of outreach. If you’re a person who finds this research direction interesting and who actually knows what they’re doing; you’re so welcome to contact me about mentoring, guidance, supervision, or other forms of collaboration. My email is <span class="snippet">samy2004@gmail.com</span></p>
+
+<p>What would you gain out of this? I suggest the possibility of discovering something which makes the field a slightly more interesting place; this article is about a ~500 line general parser and a similarly sized Datalog interpreter, both of which can be explained to someone else in about an hour. The only thing missing is the correctness and complexity proofs; and then both parsing and Datalog could become much more ubiquitously used. We also have the potential of the GSS as a new computer science workhorse, through introducing more variants of Takmela’s algorithm for many other uses. Thank you for giving someone the benefit of doubt in the name of pursuing ideas!</p>
+</body>
+</html>

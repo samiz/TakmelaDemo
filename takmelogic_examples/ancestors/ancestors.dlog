@@ -1,0 +1,17 @@
+// Notice that constants always start with small letters while
+// variables will always start with capital letters
+parent("a", "b").
+parent("b", "c").
+parent("a", "d").
+parent("d", "e").
+
+// If there’s a Z such that X is a parent of Z, and Z is a 
+// parent of Y, we can infer the relation "X is a grandparent of Y"
+grandparent(X, Y):- parent(X, Z), parent(Z, Y).
+
+// All parents are ancestors
+ancestor(X, Y):- parent(X, Y).
+
+// An ancestor of an ancestor is also an ancestor
+// Notice that Z is used in exactly the same way as in ‘grandparent’
+ancestor(X, Y):- ancestor(X, Z), ancestor(Z, Y).

@@ -1,0 +1,9 @@
+testStar: NUM*;
+
+testPlus: NUM+;
+
+testQuestion: NUM?;
+
+NUM:[0-9]+;
+
+WS skip: [ \r\n\t]*;

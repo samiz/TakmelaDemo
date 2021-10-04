@@ -1,0 +1,43 @@
+dot: "digraph" ID "{" 
+        (graph | node | n | edge)*
+    "}";
+
+
+graph: "graph"  "[" (grAttr ("," grAttr)*)?     "]" ";";
+
+node:  "node"   "[" (nodeAttr ("," nodeAttr)*)? "]" ";";
+
+n   :  ID       "[" (nAttr ("," nAttr)*)?       "]" ";";
+
+edge:  ID '->' ID "[" (edgeAttr ("," edgeAttr)*)? "]" ";";
+    
+grAttr: "bb" "=" STR
+        | "ranksep" "=" DOUBLE 
+         ;
+
+nodeAttr: "label" "=" STR;
+
+nAttr:
+      "height" "=" DOUBLE
+    | "width" "=" DOUBLE
+    | "label" "=" STR
+    | "label" "=" ID
+    | "pos" "=" STR
+    ;
+
+edgeAttr:
+      "label" "=" STR
+    | "label" "=" ID
+    | "pos" "=" STR
+    | "lp" "=" STR
+    ;
+
+STR:  '"' ([^\"])* '"' ;
+
+DOUBLE: [0-9]+ ('.' [0-9]*)?;
+
+ID: [a-zA-Z] [a-zA-Z0-9]*;
+
+WS skip: [ \r\n\t]*;
+COMMENT skip: '//' ([^\n])* '\n';
+COMMENT2 skip: '/*' ([^*]|('*' [^/]))* '*/';    

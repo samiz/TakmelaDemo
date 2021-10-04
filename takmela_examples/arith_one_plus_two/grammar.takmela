@@ -1,0 +1,12 @@
+// The 'arithmetic' example, with shorter names
+// to make graph labels clear in visualization
+
+e : e '+' t 
+    | t ;
+t : 
+    NUM
+    ;
+    
+NUM: [0-9]+;
+
+WS skip: [ \r\n\t]*;

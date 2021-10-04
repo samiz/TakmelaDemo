@@ -1,0 +1,67 @@
+<!DOCTYPE html">
+<html><head><meta charset="utf-8"><title>Takmela: Reverse-same-generation Datalog Example (full)</title>
+<link rel="stylesheet" href="../../common.css">
+<link rel="stylesheet" href="../../dom.css">
+<script src="../../dom.js"></script>
+</head>
+<body>
+
+<div class="topNav">
+<a href="../../takmela_article.html">Main Article</a><a href="../../examples_toc.html">Examples TOC</a>
+</div>
+<div style="clear:both;"></div>
+
+
+<h1>Takmela: Reverse-same-generation Datalog Example (full)</h1>
+
+<p>A well-known example program for Datalog, which I found in the book "Foundations of Databases" by Abiteboul, Hull & Viano, presented in chapter 13</p>
+
+<p>The complete example is presented on this page. An abridged version (the difference being a smaller fact set) is presented <a href="../rsg_abridged/index.html">here</a>. I don't realistically expect readers to follow this long trace (at a whopping 127 trace steps) but since I had it anyway I included it for fun; an interesting research problem is how to make even this trace understandable so I'll leave it as a reminder!</p>
+
+<span class="section">Program</span>
+<pre>
+// 'up' means 'goes up to'
+up("a", "e").
+up("a", "f").
+up("f", "m").
+up("g", "n").
+up("h", "n").
+up("i", "o").
+up("j", "o").
+
+// 'goes horizontally toward'
+flat("g", "f").
+flat("m", "n").
+flat("m", "o").
+flat("p", "m").
+
+// 'goes down to'
+down("l", "f").
+down("m", "f").
+down("g", "b").
+down("h", "c").
+down("i", "d").
+down("p", "k").
+
+reverse_same_generation(X, Y):-
+    flat(X, Y).
+
+reverse_same_generation(X, Y):-
+    up(X, X1),
+    reverse_same_generation(Y1, X1),
+    down(Y1, Y)
+    .
+</pre>
+
+<span class="section">Query</span>
+<pre>
+reverse_same_generation(A, B)
+</pre>
+
+<p>For the sake of reducing graph size, the identifiers <span class="snippet">'up'</span> , <span class="snippet">'down'</span> , <span class="snippet">'flat'</span> and <span class="snippet">'reverse_same_generation'</span> will be renamed in the actual trace to <span class="snippet">'u'</span> , <span class="snippet">'d'</span> , <span class="snippet">'f'</span> and <span class="snippet">'r'</span> respectively.
+
+<p class="traceHintMessage">Hint: Hovering over a graph expands it</p>
+<p class="traceHintMessage">Trace appears confusing? <a href="../../trace_legend.html">This</a> might help</p>
+    {{trace_is_here}}
+</body>
+</html>

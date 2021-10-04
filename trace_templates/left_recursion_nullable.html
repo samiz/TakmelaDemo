@@ -1,0 +1,44 @@
+<!DOCTYPE html">
+<html><head><meta charset="utf-8"><title>Takmela: Left recursion due to nullable nonterminals example</title>
+<link rel="stylesheet" href="../../common.css">
+<link rel="stylesheet" href="../../dom.css">
+<script src="../../dom.js"></script>
+</head>
+<body>
+
+<div class="topNav">
+<a href="../../takmela_article.html">Main Article</a><a href="../../examples_toc.html">Examples TOC</a>
+</div>
+<div style="clear:both;"></div>
+
+
+<h1>Takmela: Left recursion due to nullable nonterminals example</h1>
+</pre>
+<p>This is an example of 'invisible' left-recursion; the left recursion here isn't syntactic but can appear at runtime due to <span class="snippet">b</span> being nullable, and thus <span class="snippet">a</span> can call itself without consuming any input. I'm not sure this example follows the formal definition of left recursion, so let's call it "left-recursion-like behavior due to nullable nonterminals"</p>
+
+<p>Again, Takmela's algorithm doesn't know or care about all this, it just dutifully parses the input</p>
+
+<span class="section">Grammar</span>
+<pre>
+a:  b a c
+  | 'a'
+;
+
+b:   'b'
+   | ;
+   
+c : 'c';
+    
+NUM: [0-9]+;
+
+PLUS: '+';
+WS skip: ' '*;
+</pre>
+<span class="section">Input</span>
+<pre>
+bacc
+</pre>
+<p class="traceHintMessage">Trace appears confusing? <a href="../../trace_legend.html">This</a> might help</p>
+{{trace_is_here}}
+</body>
+</html>

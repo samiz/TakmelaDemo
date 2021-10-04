@@ -1,0 +1,13 @@
+// The ancestors example again, but with a() and p() instead of ancestor() and parent()
+// for clear labels on the staged graph visualization
+
+p("a", "b").
+p("b", "c").
+p("a", "d").
+p("d", "e").
+
+g(X, Y):- p(X, Z), p(Z, Y).
+
+a(X, Y):- p(X, Y).
+
+a(X, Y):- a(X, Z), a(Z, Y).

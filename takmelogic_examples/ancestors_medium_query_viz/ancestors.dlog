@@ -1,0 +1,12 @@
+// The ancestors example again with the facts slightly modified
+
+p("a", "b").
+p("b", "c").
+p("c", "d").
+p("d", "e").
+
+g(X, Y):- p(X, Z), p(Z, Y).
+
+a(X, Y):- p(X, Y).
+
+a(X, Y):- a(X, Z), a(Z, Y).

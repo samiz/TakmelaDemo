@@ -1,0 +1,40 @@
+<!DOCTYPE html">
+<html><head><meta charset="utf-8"><title>Takmela: Parsing arithmetic expression example (1+2)</title>
+<link rel="stylesheet" href="../../common.css">
+<link rel="stylesheet" href="../../dom.css">
+<script src="../../dom.js"></script>
+</head>
+<body>
+
+<div class="topNav">
+<a href="../../takmela_article.html">Main Article</a><a href="../../examples_toc.html">Examples TOC</a>
+</div>
+<div style="clear:both;"></div>
+
+
+<h1>Takmela: Parsing arithmetic expression example (1+2)</h1>
+<p>The first step in understanding how Takmela works! The next step is  <a href="../arith_one_plus_two_plus_three/index.html">1+2+3</a></p>
+<span class="section">Grammar</span>
+<pre>
+// The 'arithmetic' example, with shorter names
+// to make graph labels clear in visualization
+
+e : e '+' t 
+    | t ;
+t : 
+    NUM
+    ;
+    
+NUM: [0-9]+;
+
+WS skip: [ \r\n\t]*;
+</pre>
+<span class="section">Input</span>
+<pre>
+1+2
+</pre>
+<p class="traceHintMessage">Trace appears confusing? <a href="../../trace_legend.html">This</a> might help</p>
+
+{{trace_is_here}}
+</body>
+</html>

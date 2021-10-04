@@ -1,0 +1,52 @@
+<!DOCTYPE html">
+<html><head><meta charset="utf-8"><title>Takmela: Nullable bug example from Aycock-Horspool (shorter input)</title>
+<link rel="stylesheet" href="../../common.css">
+<link rel="stylesheet" href="../../dom.css">
+<script src="../../dom.js"></script>
+</head>
+<body>
+
+<div class="topNav">
+<a href="../../takmela_article.html">Main Article</a><a href="../../examples_toc.html">Examples TOC</a>
+</div>
+<div style="clear:both;"></div>
+
+
+<h1>Takmela: Nullable bug example from Aycock-Horspool (shorter input)</h1>
+
+<p>This is a trace of a grammar that demonstrated a bug found in earlier versions of Earley's parser, related to nullable non-terminals. Let's run it on Takmela and see if the input will be accepted!</p>
+
+<p>(I found the example in John Aycock and R. Nigel Horspool's paper "Practical Earley Parsing", I've used a simplified grammar rather than the exact one in the paper to make it easier to trace. If you want to run the example with the full grammar you can find it <a href="../nullable_nonterminal_bug/index.html">here</a>).</p>
+
+<p>Since this sample grammar is ambigous it will also be a good opportunity to see how ambiguity is handled in Takmela. Takmela's algorithm holds a close relationship between parse trees and ambiguity; in order to handle ambiguity a continuation will have a new data item: the parse tree so far. So for example a continuation<span class="snippet"> ( a/5 ; a → b c • d ; a(b('X'), c('Y')) )</span> means the following:</p>
+<ol>
+<li>This continuation resumes a call to <span class="snippet">a</span> which started at input position <span class="snippet">5</span></li>
+<li>The parse of non-terminals <span class="snippet">b</span> and <span class="snippet">c</span> has already been done, it is now <span class="snippet">d</span>'s turn</li>
+<li>The parse tree so far has the sub-trees from <span class="snippet">b</span> and <span class="snippet">c</span> already attached (those subtrees matched the terminals <span class="snippet">'X'</span> and <span class="snippet">'Y'</span> respectively) and is waiting for the sub-tree from parsing <span class="snippet">d</span></li>
+</ol>
+
+<p>A similar change happens to the successes list: each success, in addition to the final input position, now carries a list of the parse trees involved.</p>
+
+<p>Since continuations now also include tree information, the graph will be somewhat dense and hard to read. Hovering on a graph might help.</p>
+
+<span class="section">Grammar</span>
+<pre>
+start: s;
+
+s: a a a;
+
+a: 'a' | e;
+
+e: ;
+
+WS skip: [ \r\n\t]*;
+</pre>
+<span class="section">Input</span>
+<pre>
+a
+</pre>
+<p class="traceHintMessage">Trace appears confusing? <a href="../../trace_legend.html">This</a> might help</p>
+{{trace_is_here}}
+
+</body>
+</html>

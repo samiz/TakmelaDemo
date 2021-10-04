@@ -1,0 +1,14 @@
+expr : expr '+' term 
+    | term ;
+    
+term : 
+      NUM
+    | ID
+    | expr '.' ID '(' expr ')'
+    ;
+    
+
+ID : [a-zA-Z]+;
+NUM: [0-9]+;
+
+WS skip: [ \r\n\t]*;

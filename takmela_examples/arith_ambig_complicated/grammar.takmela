@@ -1,0 +1,16 @@
+// Arithmetic expressions with deliberate ambiguity
+// to see how Takmela handles it
+// e.g 1+a(3) -> [1+a](3) or 1 + [a(3)]
+
+e :   e '+' t 
+    | t ;
+t : 
+      ID 
+    | NUM
+    | e '(' e ')';
+    
+ID: [a-zA-Z] [a-zA-Z0-9]*;
+
+NUM: [0-9]+;
+
+WS skip: [ \r\n\t]*;

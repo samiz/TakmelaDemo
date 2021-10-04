@@ -1,0 +1,7 @@
+expr : expr '+' expr 
+    | NUM ;
+
+    
+NUM: [0-9]+;
+
+WS skip: [ \r\n\t]*;

@@ -1,0 +1,9 @@
+start: s;
+
+s: a a a;
+
+a: 'a' | e;
+
+e: ;
+
+WS skip: [ \r\n\t]*;

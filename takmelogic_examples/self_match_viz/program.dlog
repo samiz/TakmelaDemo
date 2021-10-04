@@ -1,0 +1,20 @@
+/*
+    Every new Datalog interpreter should be tested with a program
+    where a variable occurs more than once in an atom, thus having to match
+    an earlier occurrence of itself.
+*/
+
+buys("a", "a", "noodles").
+buys("a", "b", "watch").
+
+buys("b", "a", "socks").
+buys("b", "c", "gloves").
+
+buys("c", "c", "suit").
+
+
+selfBuys(X):- buys(X, X, Something).
+
+likes(X, Y):- buys(X, Y, Something).
+
+selfLikes(X):- likes(X, X).

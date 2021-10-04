@@ -1,0 +1,16 @@
+// An example, from "Practical Earley Parsing" by Aycock & Horspool,
+// which demonstrates a problem with initial versions of Earley's parser
+// related to how it deals with nullable nonterminals
+
+// In the original paper the unmodified parser would reject the valid input "a"
+// Let's trace the same example with Takmela
+
+start: s;
+
+s: a a a a;
+
+a: 'a' | e;
+
+e: ;
+
+WS skip: [ \r\n\t]*;

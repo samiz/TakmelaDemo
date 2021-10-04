@@ -1,0 +1,20 @@
+// Arithmetic expression again, but something
+// more complicated than 1+2+3
+
+e : e '+' t 
+    | t ;
+    
+t : t '*' f 
+    | f ;
+        
+f : 
+      NUM
+    | ID
+    | '(' e ')'
+    | ID '(' e ')'
+    ;
+    
+ID:  [a-zA-Z]+;
+NUM: [0-9]+;
+
+WS skip: [ \r\n\t]*;

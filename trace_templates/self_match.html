@@ -1,0 +1,45 @@
+<!DOCTYPE html">
+<html><head><meta charset="utf-8"><title>Takmela: Self-matching variable Datalog Example</title>
+<link rel="stylesheet" href="../../common.css">
+<link rel="stylesheet" href="../../dom.css">
+<script src="../../dom.js"></script>
+</head>
+<body>
+
+<div class="topNav">
+<a href="../../takmela_article.html">Main Article</a><a href="../../examples_toc.html">Examples TOC</a>
+</div>
+<div style="clear:both;"></div>
+
+
+<h1>Takmela: Self-matching variable Datalog Example</h1>
+<p>Every new Datalog interpreter should be tested with a program that contains an atom like <span class="snippet">p(X, X, Y)</span> where a variable occurs more than once, thus having to match an earlier occurrence of itself.</p>
+
+<span class="section">Program</span>
+<pre>
+buys("a", "a", "noodles").
+buys("a", "b", "watch").
+
+buys("b", "a", "socks").
+buys("b", "c", "gloves").
+
+buys("c", "c", "suit").
+
+
+selfBuys(X):- buys(X, X, Something).
+
+likes(X, Y):- buys(X, Y, Something).
+
+selfLikes(X):- likes(X, X).
+</pre>
+<span class="section">Query</span>
+<pre>
+selfLikes(X)
+</pre>
+
+<p>Hint: Hovering over a graph expands it</p>
+
+{{trace_is_here}}
+    
+</body>
+</html>
