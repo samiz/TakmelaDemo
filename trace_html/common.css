@@ -1,0 +1,100 @@
+.topNav
+{
+    float:right;
+}
+
+.topNav a
+{
+    font-size:90%;
+    margin:0px;
+    padding:4px;
+    border:1px solid lightgray;
+    text-decoration:none;
+}
+
+h1
+{
+    text-align:center;
+}
+
+h2
+{
+    border-bottom:1px dotted gray;
+}
+
+div.example-box
+{
+    padding:3px;
+    margin-bottom:10px;
+    margin-left: 15px;
+    border:1px solid black;
+}
+
+div.example-box h3
+{
+    margin-top:5px;
+    border-bottom:1px solid;
+}
+
+span.snippet
+{
+    font-family: monospace;
+    font-size:150%;
+    border:1px solid lightgrey;
+    border-radius:2px;
+    padding:1px;
+    
+    display:inline-block;
+    margin-bottom:1px;
+}
+
+span.def
+{
+    display:inline-block;
+    border:3px double darkgrey;
+    padding:1px;
+    margin-top:3px;
+}
+
+body
+{
+    margin: 20px 70px 20px 70px;
+}
+
+pre
+{
+    margin:10px 5px 15px 10px;
+    padding:5px;
+    border:1px solid lightgray;
+    font-size:130%;
+}
+
+table
+{
+    white-space-collapse:collapse;
+    border-collapse:collapse;
+}
+
+table td
+{
+    margin:0px;
+    padding:3px;
+    border: 1px solid black;
+    vertical-align:top;
+    padding-top:10px;
+}
+
+.traceHintMessage
+{
+    font-size:80%;
+}
+
+.traceHintMessage a 
+{
+    text-decoration:none;
+}
+
+ul li, ol li
+{
+    margin-bottom:5px;
+}

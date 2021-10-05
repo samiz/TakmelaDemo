@@ -1,4 +1,6 @@
 /trace_html/*
+!/trace_html/*.css
+!/trace_html/*.js
 /test_output/**
 
 

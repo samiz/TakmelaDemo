@@ -1,0 +1,274 @@
+.takmela-trace table
+{
+    white-space-collapse:collapse;
+    border-collapse:collapse;
+}
+
+.takmela-trace table td
+{
+    margin:0px;
+    padding:3px;
+    border: 1px solid black;
+    vertical-align:top;
+    padding-top:10px;
+}
+
+.takmela-trace tr.step-tr:not(.first-step-tr)
+{
+    border-top:3px solid black;
+}
+
+.takmela-trace td.successes-cell
+{
+    border-top:none;
+}
+
+.takmela-trace img.graph
+{
+    /* If you change the image's margin in the CSS file, remember to change the placeholder's margin 
+       in dom.js  too
+    */
+    margin:5px;
+    max-width:670px;
+}
+
+.takmela-trace .step
+{
+    font-size:105%;
+    border-bottom:1px solid black;
+    margin-bottom:2px;
+}
+
+.takmela-trace .processing
+{
+    /* border:1px dotted gray; */
+    margin-bottom:15px;
+    padding: 5px;
+}
+
+.takmela-trace .processingHeader
+{
+    background-color:#ddf;
+    padding:2px;
+    margin-bottom:2px;
+}
+
+.takmela-trace .iterationHeader
+{
+    background-color:#eeeeee;
+}
+
+.takmela-trace .worklistHeader
+{
+    display:block;
+    border-bottom: 2px dotted black;
+    margin-bottom:2px;
+}
+
+.takmela-trace .processingOp
+{
+    margin-left:3px;
+}
+
+.takmela-trace .snippet
+{
+    font-family: monospace;
+    font-size:190%;
+    border:1px solid grey;
+    border-radius:3px;
+}
+
+.takmela-trace .contVar
+{
+    color:#411;
+    font-weight:bold;
+}
+
+.takmela-trace .idleSuccess, .takmela-trace .idleNewCall, 
+.takmela-trace .activeSuccess, .takmela-trace .activeNewCall,
+.takmela-trace .usedSuccess, .takmela-trace .usedNewCall,
+.takmela-trace .failedMatchSuccess, .takmela-trace .failedMatchNewCall ,
+
+.takmelaLabelsExplanation .idleSuccess, .takmelaLabelsExplanation .idleNewCall, 
+.takmelaLabelsExplanation .activeSuccess, .takmelaLabelsExplanation .activeNewCall,
+.takmelaLabelsExplanation .usedSuccess, .takmelaLabelsExplanation .usedNewCall,
+.takmelaLabelsExplanation .failedMatchSuccess, .takmelaLabelsExplanation .failedMatchNewCall
+
+{
+    font-family:monospace;
+    font-weight: bold;
+    border: 1px solid #944;
+}
+
+.takmela-trace .idleSuccess, .takmela-trace .idleNewCall ,
+.takmelaLabelsExplanation .idleSuccess, .takmelaLabelsExplanation .idleNewCall ,
+.takmela-trace .failedMatchSuccess, .takmela-trace .failedMatchNewCall ,
+.takmelaLabelsExplanation .failedMatchSuccess, .takmelaLabelsExplanation .failedMatchNewCall 
+
+{
+    color:#944;
+}
+
+.takmela-trace .activeSuccess, .takmela-trace .activeNewCall, 
+.takmelaLabelsExplanation .activeSuccess, .takmelaLabelsExplanation .activeNewCall
+{
+    color:#449;
+}
+
+.takmela-trace .usedSuccess, .takmela-trace .usedNewCall ,
+.takmelaLabelsExplanation .usedSuccess, .takmelaLabelsExplanation .usedNewCall
+{
+    color:#494;
+}
+
+.takmela-trace .newItem
+{
+    color:darkred;
+    border-color:darkred;
+}
+
+.takmela-trace .successes
+{
+    display:flex;
+    max-height:250px;
+    min-height:80px;
+    flex-flow:column wrap;
+    
+    font-family:monospace;
+    font-size:110%;
+}
+
+.takmela-trace .successes.biig
+{
+    max-height:none;
+    min-height:80px;
+    
+    display:block;
+    column-width:120px;
+   /* display:flex;
+    flex-flow:column;
+    */
+}
+
+.takmela-trace .new-ks
+{
+    display:flex;
+    flex-flow:column wrap;
+}
+
+.takmela-trace .success, .takmela-trace .new-success
+{
+    margin-top:2px; 
+    margin-bottom:2px; 
+}
+
+.takmela-trace .new-success
+{
+    color:red;
+}
+
+.takmela-trace .treeSep
+{
+    color:441111;
+    border:1px solid;
+    border-radius:5px;
+}
+
+.takmela-trace .forest
+{
+    font-size:90%;
+}
+
+.takmela-trace .tick
+{
+    color:green;
+    font-size:120%;
+}
+
+.takmela-trace .cross
+{
+    color:red;
+    font-size:120%;
+}
+
+.takmela-trace .open-rainbow-0, .takmela-trace .close-rainbow-0 
+{
+    color:#e67;
+    font-size:115%;
+}
+
+.takmela-trace .open-rainbow-1, .takmela-trace .close-rainbow-1
+{
+    color:#67c;
+    font-size:105%;
+}
+
+.takmela-trace .open-rainbow-2, .takmela-trace .close-rainbow-2
+{
+    color:#4b2;
+    font-size:100%;
+}
+
+.takmela-trace .open-rainbow-3, .takmela-trace .close-rainbow-3
+{
+    color:#83b;
+    font-size:90%;
+}
+
+.takmela-trace .open-rainbow-4, .takmela-trace .close-rainbow-4,
+.takmela-trace .open-rainbow-5, .takmela-trace .close-rainbow-5,
+.takmela-trace .open-rainbow-6, .takmela-trace .close-rainbow-6,
+.takmela-trace .open-rainbow-7, .takmela-trace .close-rainbow-7,
+.takmela-trace .open-rainbow-8, .takmela-trace .close-rainbow-8,
+.takmela-trace .open-rainbow-9, .takmela-trace .close-rainbow-9,
+.takmela-trace .open-rainbow-10, .takmela-trace .close-rainbow-10,
+.takmela-trace .open-rainbow-11, .takmela-trace .close-rainbow-11,
+.takmela-trace .open-rainbow-12, .takmela-trace .close-rainbow-12,
+.takmela-trace .open-rainbow-13, .takmela-trace .close-rainbow-13,
+.takmela-trace .open-rainbow-14, .takmela-trace .close-rainbow-14,
+.takmela-trace .open-rainbow-15, .takmela-trace .close-rainbow-15,
+.takmela-trace .open-rainbow-16, .takmela-trace .close-rainbow-16
+{
+    color:#44c;
+    font-size:85%;
+}
+
+.takmela-trace .rainbow-0
+{
+}
+
+.takmela-trace .rainbow-1
+{
+    position:relative;
+    top:2px;
+}
+
+.takmela-trace .rainbow-2
+{
+    position:relative;
+    top:3px;
+}
+
+.takmela-trace .rainbow-3
+{
+    position:relative;
+    top:4px;
+}
+
+.takmela-trace .rainbow-4, 
+.takmela-trace .rainbow-5, 
+.takmela-trace .rainbow-6, 
+.takmela-trace .rainbow-7, 
+.takmela-trace .rainbow-8, 
+.takmela-trace .rainbow-9, 
+.takmela-trace .rainbow-10,
+.takmela-trace .rainbow-11,
+.takmela-trace .rainbow-12,
+.takmela-trace .rainbow-13,
+.takmela-trace .rainbow-14,
+.takmela-trace .rainbow-15,
+.takmela-trace .rainbow-16
+{
+    position:relative;
+    top:4px;
+}
